@@ -82,11 +82,11 @@ class User(AbstractBaseUser):
 
     def get_role(self):
         user_role = ''
-        
-        if self.role == 1:
+
+        if self.role == self.Vendor:
             user_role = 'Vendor'
 
-        if self.role == 2:
+        if self.role == self.CUSTOMER:
             user_role = 'Customer'
 
         return user_role
