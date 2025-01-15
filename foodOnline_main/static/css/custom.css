@@ -8,6 +8,7 @@
     position: fixed;
     bottom: 100%;
     right: 20px;
+    z-index: 1000;
     animation-name: show-toast;
     animation-duration: 8s;
 }
