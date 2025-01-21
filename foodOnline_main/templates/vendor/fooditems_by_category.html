@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% include 'includes/alerts.html' %}
+<!-- Main Section Start -->
+<div class="main-section">
+    {% include 'includes/cover.html' %}
+    <div class="page-section account-header buyer-logged-in">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                    <div class="user-account-nav user-account-sidebar">
+                        {% include 'includes/v_sidebar.html' %}
+                    </div>
+                </div>
+                <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
+                    <div class="user-dashboard loader-holder">
+                        <div class="user-holder">
+                            <h2>Build Your Food Menu</h2>
+                            <hr>
+                            <button class="btn btn-secondary" onclick="history.back()"><i class="fa-solid fa-angle-left"></i> Back</button>
+                            <br><br>
+                            <h6>Category: <span class="text-success text-uppercase">{{ category }}</span></h6>
+
+                            {% if fooditems %}
+                                <table class="table table-borderless">
+                                    <tbody>
+                                    {% for fooditem in fooditems %}
+                                        <tr>
+                                            <td class="text-left">{{ forloop.counter }}</td>
+                                            <td class="text-left"><img src="{{ fooditem.image.url }}" width="40" alt="Food image" /></td>
+                                            <td class="text-left">
+                                                <a href="#">
+                                                    <p class="mb-0 font-weight-bold">{{ fooditem }}</p>
+                                                    <small class="text-muted">{{ fooditem.description }}</small>
+                                                </a>
+                                            </td>
+                                            <td><i class="fa-solid fa-pencil"></i> &nbsp; <i class="fa-solid fa-trash text-danger"></i></td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            {% else %}
+                                <h5 class="text-center">No food items found.</h5>
+                                <div class="text-center">
+                                    <a href="#" class="btn btn-success"><i class="fa-solid fa-plus"></i>&nbsp; Add food</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Main Section End -->
+{% endblock %}

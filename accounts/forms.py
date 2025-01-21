@@ -28,7 +28,7 @@ class UserProfileForm(forms.ModelForm):
         attrs={'class': 'btn btn-info'}),
         validators=[allow_only_images_validator]
     )
-    
+
     cover_photo = forms.FileField(widget=forms.FileInput(
         attrs={'class': 'btn btn-info'}),
         validators=[allow_only_images_validator]
@@ -51,8 +51,8 @@ class UserProfileForm(forms.ModelForm):
         ]
 
     # set readonly fields
-    def __init__(self, *args, **kwargs):
-        super(UserProfileForm, self).__init__(*args, **kwargs)
-        for field in self.fields:
-            if field in ['latitude', 'longtitude']:
-                self.fields[field].widget.attrs['readonly'] = 'readonly'
+    # def __init__(self, *args, **kwargs):
+    #     super(UserProfileForm, self).__init__(*args, **kwargs)
+    #     for field in self.fields:
+    #         if field in ['latitude', 'longtitude']:
+    #             self.fields[field].widget.attrs['readonly'] = 'readonly'

@@ -1,4 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
+
+from menu.forms import CategoryForm
 from .forms import VendorForm
 from accounts.forms import UserProfileForm, User
 from accounts.models import UserProfile
@@ -6,13 +8,18 @@ from vendor.models import Vendor
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
+from menu.models import Category, FoodItem
+from django.template.defaultfilters import slugify
+
+def get_vendor(request):
+    return Vendor.objects.get(user=request.user)
 
 def check_role_vendor(user):
     if user.role == User.Vendor:
         return True
     else:
         raise PermissionDenied
-    
+
 @login_required(login_url='login')
 @user_passes_test(check_role_vendor)
 def vprofile(request):
@@ -42,3 +49,73 @@ def vprofile(request):
     }
 
     return render(request, 'vendor/vprofile.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(check_role_vendor)
+def menu_builder(request):
+    categories = Category.objects.filter(vendor=get_vendor(request)).order_by('created_at')
+    context = {
+        'categories': categories
+    }
+
+    return render(request, 'vendor/menu_builder.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(check_role_vendor)
+def fooditems_by_category(request, pk=None):
+    category = get_object_or_404(Category, pk=pk)
+    fooditems = FoodItem.objects.filter(vendor=get_vendor(request), category=category)
+    context = {
+        'fooditems': fooditems,
+        'category': category
+    }
+
+    return render(request, 'vendor/fooditems_by_category.html', context)
+
+def add_category(request):
+    if request.method == 'POST':
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            category_name = form.cleaned_data['category_name']
+            category = form.save(commit=False)
+            category.vendor = get_vendor(request)
+            category.slug = slugify(category_name)
+            form.save()
+            messages.success(request, 'Category added successfully')
+            return redirect('menu_builder')
+    else:
+        form = CategoryForm()
+
+    context = {
+        'form': form
+    }
+
+    return render(request, 'vendor/add_category.html', context)
+
+def edit_category(request, pk=None):
+    category = get_object_or_404(Category, pk=pk)
+    if request.method == 'POST':
+        form = CategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            category_name = form.cleaned_data['category_name']
+            category = form.save(commit=False)
+            category.vendor = get_vendor(request)
+            category.slug = slugify(category_name)
+            form.save()
+            messages.success(request, 'Category updated successfully')
+            return redirect('menu_builder')
+    else:
+        form = CategoryForm(instance=category)
+
+    context = {
+        'form': form,
+        'category': category
+    }
+    return render(request, 'vendor/edit_category.html', context)
+
+def delete_category(request, pk=None):
+    category = get_object_or_404(Category, pk=pk)
+    category.delete()
+    messages.success(request, 'Category deleted successfully')
+
+    return redirect('menu_builder')
