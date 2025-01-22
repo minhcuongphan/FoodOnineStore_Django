@@ -1,0 +1,44 @@
+<div class="form-fields-set">
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="field-holder">
+                <label>Category name *</label>
+                {{ form.category }}
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="field-holder">
+                <label>Food title *</label>
+                {{ form.food_title }}
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="field-holder">
+                <label>Description</label>
+                {{ form.description }}
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <div class="field-holder">
+                <label>Price *</label>
+                {{ form.price }}
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <div class="field-holder">
+                <label>Image *</label>
+                {{ form.image }}
+
+                {% if food.image %}
+                    <img src="{{ food.image.url }}" alt="Food image" width="100" class="mt-3">
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="field-holder">
+                <label>Is Available?</label>
+                {{ form.is_available }}
+            </div>
+        </div>
+    </div>
+</div>

@@ -20,12 +20,12 @@
                             <hr>
                             <button class="btn btn-secondary" onclick="history.back()"><i class="fa-solid fa-angle-left"></i> Back</button>
                             <br><br>
-                            <h6>Add New Category</h6>
+                            <h6>Edit Food Item</h6>
 
-                           <form action="{% url 'add_category' %}" method="POST">
+                           <form action="{% url 'edit_food' food.id %}" method="POST" enctype="multipart/form-data">
                                 {% csrf_token %}
 
-                                {% include 'vendor/forms/category_form.html' %}
+                                {% include 'vendor/forms/food_form.html' %}
 
                                 {% for field in form %}
                                     {% if field.errors %}
@@ -35,7 +35,7 @@
                                     {% endif %}
                                 {% endfor %}
                                 <button type="submit" class="btn btn-info">
-                                    <i class="fa-solid fa-check"></i> Create
+                                    <i class="fa-solid fa-check"></i> Update
                                 </button>
                            </form>
 
