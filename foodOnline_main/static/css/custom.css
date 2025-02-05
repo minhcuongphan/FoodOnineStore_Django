@@ -18,3 +18,14 @@
     font-size: 12px;
     cursor: pointer;
 }
+
+#cart_counter {
+    border-radius: 50px;
+    position: relative;
+    bottom: 10px;
+    left: -5px;
+}
+
+#shopping_cart_icon {
+    font-size: 20px;
+}
