@@ -137,4 +137,83 @@ $(document).ready(function() {
 
         Swal.fire(options);
     }
+
+    $('.add_hour').on('click', function(e) {
+        e.preventDefault();
+        let day = $('#id_day').val();
+        let from_hour = $('#id_from_hour').val();
+        let to_hour = $('#id_to_hour').val();
+        let is_closed = $('#id_is_closed').is(":checked");
+        let csrf_token = $('input[name=csrfmiddlewaretoken]').val();
+        let url = $('#add_hour_url').val();
+
+        is_closed = is_closed ? "True" : "False";
+        condition = is_closed ? "day != ''" : "day != '' && from_hour != '' && to_hour != ''";
+
+        if (!eval(condition)) {
+            Swal.fire({
+                title: "",
+                icon: "info",
+                text: "Please fill all fields",
+                showCancelButton: false,
+                confirmButtonColor: "#3085d6",
+                confirmButtonText: "Ok",
+            });
+
+            return;
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: {
+                'day': day,
+                'from_hour': from_hour,
+                'to_hour': to_hour,
+                'is_closed': is_closed,
+                'csrfmiddlewaretoken': csrf_token
+            },
+            success: function(response) {
+                handleErrorMessages(response);
+
+                if (response.status == 'Failed') {
+                    return;
+                }
+
+                let html = ''
+                if (response.is_closed == 'Closed') {
+                    html = "<tr id='open_hour_" + response.id+ "'>" +
+                        "<td><b>" + response.day + "</b></td>" +
+                        "<td>Closed</td>" +
+                        "<td><a href='#' class='delete_opening_hour' data-id='" + response.id + "' data-url='opening-hours/delete/" + response.id + "'>Remove</a></td>" +
+                    "</tr>"
+                } else {
+                    html = "<tr id='open_hour_" + response.id+ "'>" +
+                        "<td><b>" + response.day + "</b></td>" +
+                        "<td>" + response.from_hour + " - " + response.to_hour + "</td>" +
+                        "<td><a href='#' class='delete_opening_hour' data-id='" + response.id + "' data-url='opening-hours/delete/" + response.id + "'>Remove</a></td>" +
+                    "</tr>"
+                }
+
+                $('.opening_hours').append(html)
+                $('#opening_hours')[0].reset();
+            }
+        })
+    })
+
+    $(document).on('click', '.delete_opening_hour', function(e) {
+        e.preventDefault();
+        url = $(this).attr('data-url');
+        hour_id = $(this).attr('data-id');
+
+        $.ajax({
+            type: 'GET',
+            url: url,
+            success: function(response) {
+                handleErrorMessages(response);
+                if (response.status == 'Failed') return;
+                $('#open_hour_'+hour_id).remove();
+            }
+        })
+    })
 });

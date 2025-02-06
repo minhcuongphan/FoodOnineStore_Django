@@ -29,3 +29,19 @@
 #shopping_cart_icon {
     font-size: 20px;
 }
+
+.opening_hours {
+    width: 500px;
+}
+
+.opening_hours td {
+    border: none !important;
+}
+
+#opening_hours select {
+    padding: 5px 10px !important;
+}
+
+.add_hour {
+    padding: 7px 15px 7px 15px;
+}
