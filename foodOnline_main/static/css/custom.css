@@ -45,3 +45,11 @@
 .add_hour {
     padding: 7px 15px 7px 15px;
 }
+
+.quantity {
+    display: inline-block;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-top: -10px;
+}

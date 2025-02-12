@@ -222,4 +222,16 @@ $(document).ready(function() {
             }
         })
     })
+
+    $('#placeOrderBtn').on('click', function(e) {
+        let paymentMethod = $("input[name='payment_method']:checked").val();
+        if (!paymentMethod) {
+            $('#payment-method-error').html('Please select a payment method');
+            return false;
+        }
+    });
+
+    $("input[name='payment_method']").on('change', function () {
+        $('#payment-method-error').html('');
+    });
 });
