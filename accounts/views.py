@@ -11,6 +11,8 @@ from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
 from vendor.models import Vendor
 from django.template.defaultfilters import slugify
+from orders.models import Order
+from django.core.paginator import Paginator
 
 # Restrcit the vendor from accessing the customer page
 def check_role_vendor(user):
@@ -157,7 +159,17 @@ def myAccount(request):
 @login_required(login_url='login')
 @user_passes_test(check_role_customer)
 def custDashboard(request):
-    return render(request, 'accounts/custDashboard.html')
+    orders = Order.objects.filter(user=request.user, is_ordered=True)
+
+    paginator = Paginator(orders, 10)  # Show 10 contacts per page.
+    page_number = request.GET.get("page")
+    paginated_orders = paginator.get_page(page_number)
+
+    context = {
+        'paginated_orders': paginated_orders,
+        'orders_count': orders.count()
+    }
+    return render(request, 'accounts/custDashboard.html', context)
 
 @login_required(login_url='login')
 @user_passes_test(check_role_vendor)
