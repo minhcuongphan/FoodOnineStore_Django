@@ -53,3 +53,7 @@
     transform: translateY(-50%);
     margin-top: -10px;
 }
+
+.custom-login-opt {
+    width: 500px;
+}

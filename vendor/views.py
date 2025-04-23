@@ -12,6 +12,13 @@ from menu.models import Category, FoodItem
 from django.template.defaultfilters import slugify
 from django.http import HttpResponse, JsonResponse
 from django.db import IntegrityError
+from orders.models import Order, OrderedFood
+from django.core.paginator import Paginator
+from .forms import CsvUploadForm
+from django.views.decorators.csrf import csrf_protect
+import csv
+import io
+import json
 
 def get_vendor(request):
     return Vendor.objects.get(user=request.user)
@@ -56,11 +63,21 @@ def vprofile(request):
 @user_passes_test(check_role_vendor)
 def menu_builder(request):
     categories = Category.objects.filter(vendor=get_vendor(request)).order_by('created_at')
-    context = {
-        'categories': categories
-    }
+    error_csv_available = False
 
-    return render(request, 'vendor/menu_builder.html', context)
+    # if request.method == "POST":
+    #     error_csv_available = 'error_csv' in request.session
+    #     valid_rows = [] if 'valid_rows' not in request.session else request.session['valid_rows']
+
+    #     if error_csv_available:
+    #         messages.error(request, 'Failed to import the csv file.')
+    #     else:
+    #         messages.success(request, f'Successfully imported {valid_rows} valid rows.')
+
+    return render(request, 'vendor/menu_builder.html', {
+        'error_csv_available': error_csv_available,
+        'categories': categories
+    })
 
 @login_required(login_url='login')
 @user_passes_test(check_role_vendor)
@@ -277,3 +294,146 @@ def commonValidations(request):
             'status': 'Failed',
             'message': 'Invalid request!'
         })
+
+def order_details(request, order_number):
+    try:
+        order = Order.objects.get(order_number=order_number, is_ordered=True)
+        ordered_food = OrderedFood.objects.filter(order=order, fooditem__vendor=get_vendor(request))
+    except:
+        return redirect('vendor')
+
+    context = {
+        'order': order,
+        'ordered_food': ordered_food,
+        'subtotal': order.get_total_by_vendor()['subtotal'],
+        'tax_data': order.get_total_by_vendor()['tax_dict'],
+        'grand_total': order.get_total_by_vendor()['grand_total'],
+    }
+
+    return render(request, 'vendor/order_details.html', context)
+
+def my_orders(request):
+    vendor = Vendor.objects.get(user=request.user)
+    orders = Order.objects.filter(vendors__in=[vendor.id], is_ordered=True).order_by('-created_at')
+
+    paginator = Paginator(orders, 10)  # Show 10 contacts per page.
+    page_number = request.GET.get("page")
+    paginated_orders = paginator.get_page(page_number)
+
+    context = {
+        'paginated_orders': paginated_orders
+    }
+
+    return render(request, 'vendor/my_orders.html', context)
+
+@csrf_protect
+def validate_and_import_csv(request):
+    if request.method == 'POST':
+        form = CsvUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            errors = form.cleaned_data['errors']
+            valid_rows = form.cleaned_data['valid_rows']
+
+            # If there are errors, generate error CSV and return
+            if errors:
+                output = io.StringIO()
+                writer = csv.writer(output)
+                writer.writerow(['row_number', 'errors', 'error_columns', 'vendor_id', 'category_id', 'food_title', 'slug', 'description', 'price'])
+                for error in errors:
+                    row_data = error['row_data']
+                    writer.writerow([
+                        error['row_number'],
+                        error['errors'],
+                        error['error_columns'],
+                        row_data.get('vendor_id', ''),
+                        row_data.get('category_id', ''),
+                        row_data.get('food_title', ''),
+                        row_data.get('slug', ''),
+                        row_data.get('description', ''),
+                        row_data.get('price', '')
+                    ])
+
+                # Store error CSV in session
+                request.session['error_csv'] = output.getvalue()
+                request.session['error_csv_filename'] = 'import_errors.csv'
+
+                return JsonResponse({
+                    'status': 'error',
+                    'errors': [{'row_number': e['row_number'], 'errors': e['errors'], 'error_columns': e['error_columns']} for e in errors],
+                    'error_csv_available': True
+                })
+            else:
+                # If all rows are valid, import them using bulk operations
+                try:
+                    request.session['valid_rows'] = len(valid_rows)
+
+                    # Prepare objects for bulk_create and bulk_update
+                    food_items_to_create = []
+                    food_items_to_update = []
+
+                    existing_slugs = set(FoodItem.objects.filter(slug__in=[row['slug'] for row in valid_rows]).values_list('slug', flat=True))
+
+                    for row in valid_rows:
+                        food_item = FoodItem(
+                            slug=row['slug'],
+                            vendor_id=int(row['vendor_id']),
+                            category_id=int(row['category_id']),
+                            food_title=row['food_title'],
+                            description=row['description'],
+                            price=float(row['price']),
+                        )
+                        if row['slug'] in existing_slugs:
+                            food_items_to_update.append(food_item)
+                        else:
+                            food_items_to_create.append(food_item)
+
+                    # Perform bulk_create and bulk_update
+                    if food_items_to_create:
+                        FoodItem.objects.bulk_create(food_items_to_create, batch_size=1000)
+                    if food_items_to_update:
+                        FoodItem.objects.bulk_update(
+                            food_items_to_update,
+                            fields=['vendor_id', 'category_id', 'food_title', 'description', 'price'],
+                            batch_size=1000
+                        )
+
+                    # Clear session data
+                    request.session.pop('error_csv', None)
+                    request.session.pop('error_csv_filename', None)
+
+                    return JsonResponse({
+                        'status': 'success',
+                        'message': f'Successfully imported {len(valid_rows)} valid rows.',
+                        'redirect_url': '/vendor/menu-builder/'
+                    })
+                except Exception as e:
+                    return JsonResponse({
+                        'status': 'error',
+                        'errors': [{'row_number': 0, 'errors': f'Import error: {str(e)}', 'error_columns': ''}]
+                    }, status=500)
+        else:
+            return JsonResponse({
+                'status': 'error',
+                'errors': form.errors.get_json_data()
+            }, status=400)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+
+def download_error_csv(request):
+    if 'error_csv' not in request.session:
+        messages.error(request, 'No error CSV available.')
+        return redirect('import_result')
+
+    error_csv_content = request.session['error_csv']
+    filename = request.session['error_csv_filename']
+
+    response = HttpResponse(
+        content_type='text/csv',
+        headers={'Content-Disposition': f'attachment; filename="{filename}"'}
+    )
+    response.write(error_csv_content)
+
+    # Clear session data
+    request.session.pop('error_csv', None)
+    request.session.pop('error_csv_filename', None)
+
+    return response

@@ -28,6 +28,7 @@ def send_verification_email(request, user, mail_subject, email_template):
     })
     to_email = user.email
     mail = EmailMessage(mail_subject, message, from_email, to=[to_email])
+    mail.content_subtype = "html"
     mail.send()
 
 def send_notification(mail_subject, mail_template, context):
@@ -36,4 +37,5 @@ def send_notification(mail_subject, mail_template, context):
     message = render_to_string(mail_template, context)
     to_mail = to_mail.append(context['to_email']) if (isinstance(context['to_email'], str)) else context['to_email']
     mail = EmailMessage(mail_subject, message, from_email, to=to_mail)
+    mail.content_subtype = "html"
     mail.send()

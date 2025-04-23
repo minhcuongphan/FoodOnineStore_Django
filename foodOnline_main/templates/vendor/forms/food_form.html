@@ -1,3 +1,5 @@
+{% load static %}
+
 <div class="form-fields-set">
     <div class="row">
         <div class="col-lg-12 col-md-12 col-sm-12">
@@ -26,11 +28,13 @@
         </div>
         <div class="col-lg-6 col-md-6 col-sm-12">
             <div class="field-holder">
-                <label>Image *</label>
+                <label>Image</label>
                 {{ form.image }}
 
                 {% if food.image %}
                     <img src="{{ food.image.url }}" alt="Food image" width="100" class="mt-3">
+                {% else %}
+                    <img src="{% static 'images/default_food_img.jpg' %}" alt="Food image" width="100" class="mt-3">
                 {% endif %}
             </div>
         </div>

@@ -9,6 +9,8 @@ from .utils import generate_order_number
 from django.http import JsonResponse
 from accounts.utils import send_notification
 from django.contrib.auth.decorators import login_required
+from menu.models import FoodItem
+from marketplace.models import Tax
 
 @login_required(login_url= 'login')
 def place_order(request):
@@ -17,6 +19,38 @@ def place_order(request):
 
     if cart_count <= 0:
         return redirect('marketplace')
+
+    taxes = Tax.objects.filter(is_active=True)
+
+    vendor_ids = []
+    sub_total = 0
+    k = {}
+    total_data = {}
+    for i in cart_items:
+        vendor_id = i.fooditem.vendor.id
+        if vendor_id not in vendor_ids:
+            vendor_ids.append(vendor_id)
+
+        fooditem = FoodItem.objects.get(pk=i.fooditem.id, vendor_id__in=vendor_ids)
+        if vendor_id in k:
+            sub_total = k[vendor_id]
+            sub_total += (fooditem.price * i.quantity)
+            k[vendor_id] = sub_total
+        else:
+            sub_total = (fooditem.price * i.quantity)
+            k[vendor_id] = sub_total
+
+        # Calculate the tax
+        tax_dict = {}
+        for tax in taxes:
+            tax_type = tax.tax_type
+            tax_percentage = tax.tax_percentage
+            tax_amount = round((tax_percentage * sub_total)/100, 2)
+            tax_dict.update({tax_type: {str(tax_percentage): str(tax_amount)}})
+
+        # Construct total data
+        total_data.update({fooditem.vendor.id: {str(sub_total): str(tax_dict)}})
+
 
     cart_amounts = get_cart_amounts(request)
     sub_total = cart_amounts['subtotal']
@@ -42,10 +76,12 @@ def place_order(request):
                     order.user = request.user
                     order.total = grand_total
                     order.tax_data = json.dumps(tax_data)
+                    order.total_data = json.dumps(total_data)
                     order.total_tax = total_tax
                     order.payment_method = request.POST.get('payment_method')
                     order.save()
                     order.order_number = generate_order_number(order.id)
+                    order.vendors.add(*vendor_ids)
                     order.save()
 
                 context = {
