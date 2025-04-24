@@ -4,7 +4,7 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import EmailMessage
+from mailqueue.models import MailerMessage
 from django.conf import settings
 
 def detectUser(user):
@@ -12,7 +12,7 @@ def detectUser(user):
         redirectUrl = 'vendorDashboard'
     if user.role == User.CUSTOMER:
         redirectUrl = 'custDashboard'
-    if user.role == None and user.is_superadmin:
+    if user.role == None and user.is_superuser:
         redirectUrl = '/admin'
 
     return redirectUrl
@@ -21,21 +21,37 @@ def send_verification_email(request, user, mail_subject, email_template):
     from_email = settings.DEFAULT_FROM_EMAIL
     current_site = get_current_site(request)
     message = render_to_string(email_template, {
-         'user': user,
-         'domain': current_site,
-         'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-         'token': default_token_generator.make_token(user)
+        'user': user,
+        'domain': current_site,
+        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+        'token': default_token_generator.make_token(user)
     })
     to_email = user.email
-    mail = EmailMessage(mail_subject, message, from_email, to=[to_email])
-    mail.content_subtype = "html"
-    mail.send()
+
+    # Use MailerMessage to queue the email
+    mail = MailerMessage()
+    mail.subject = mail_subject
+    mail.to_address = to_email
+    mail.from_address = from_email
+    mail.content = message
+    mail.content_subtype = "html"  # Set content type to HTML
+    mail.save()  # Save the email to the queue
 
 def send_notification(mail_subject, mail_template, context):
-    to_mail = []
     from_email = settings.DEFAULT_FROM_EMAIL
     message = render_to_string(mail_template, context)
-    to_mail = to_mail.append(context['to_email']) if (isinstance(context['to_email'], str)) else context['to_email']
-    mail = EmailMessage(mail_subject, message, from_email, to=to_mail)
-    mail.content_subtype = "html"
-    mail.send()
+    to_email = context['to_email']
+
+    # Handle single or multiple recipients
+    if isinstance(to_email, str):
+        to_email = [to_email]
+
+    # Use MailerMessage to queue the email
+    for email in to_email:
+        mail = MailerMessage()
+        mail.subject = mail_subject
+        mail.to_address = email
+        mail.from_address = from_email
+        mail.content = message
+        mail.content_subtype = "html"  # Set content type to HTML
+        mail.save()  # Save the email to the queue

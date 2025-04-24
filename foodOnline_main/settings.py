@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'marketplace',
     'customers',
     'orders',
+    'django_cron',
+    'mailqueue',
 ]
 
 MIDDLEWARE = [
@@ -81,6 +83,10 @@ TEMPLATES = [
             ],
         },
     },
+]
+
+CRON_CLASSES = [
+    'accounts.crons.remove_inactive_users.RemoveInactiveUsersCronJob',
 ]
 
 WSGI_APPLICATION = 'foodOnline_main.wsgi.application'
@@ -174,3 +180,21 @@ PAYPAL_CLIENT_ID = config('PAYPAL_CLIENT_ID')
 PAYPAL_SECRET_KEY = config('PAYPAL_SECRET_KEY')
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'
+
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
+
+# If you're using Celery, set this to True
+MAILQUEUE_CELERY = False
+
+# Enable the mail queue. If this is set to False, the mail queue will be disabled and emails will be
+# sent immediately instead.
+MAILQUEUE_QUEUE_UP = True
+
+# Maximum amount of emails to send during each queue run
+MAILQUEUE_LIMIT = 50
+
+# If MAILQUEUE_STORAGE is set to True, will ignore your default storage settings
+# and use Django's filesystem storage instead (stores them in MAILQUEUE_ATTACHMENT_DIR)
+MAILQUEUE_STORAGE = True
+MAILQUEUE_ATTACHMENT_DIR = BASE_DIR / 'mailqueue-attachments'
