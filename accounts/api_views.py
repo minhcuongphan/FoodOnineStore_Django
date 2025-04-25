@@ -2,6 +2,19 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from accounts.models import User
 from accounts.serializers import UserSerializer
+from rest_framework.views import APIView
+from rest_framework.exceptions import AuthenticationFailed
+import jwt
+import datetime
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import BasePermission
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+
+class IsAdminUser(BasePermission):
+    def has_permission(self, request, view):
+        return request.user and request.user.is_admin and request.user.is_superuser
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -9,6 +22,7 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         """
@@ -37,3 +51,34 @@ class UserViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # Add custom claims (optional)
+        token['email'] = user.email
+        token['role'] = user.role
+        return token
+
+class LoginAPIView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            # Extract the refresh token from the request data
+            refresh_token = request.data.get('refresh')
+            if not refresh_token:
+                return Response({'error': 'Refresh token is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Blacklist the refresh token
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

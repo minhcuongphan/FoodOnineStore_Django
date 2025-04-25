@@ -1,7 +1,9 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
-from .api_views import UserViewSet
+from .api_views import UserViewSet, LoginAPIView, LogoutView
+from rest_framework_simplejwt.views import TokenRefreshView
+
 # Create a router and register the UserViewSet
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
@@ -23,5 +25,8 @@ urlpatterns = [
     path('customer/', include('customers.urls')),
 
     # Include the router's URLs for the UserViewSet
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/', LoginAPIView.as_view(), name='token_obtain_pair'),
+    path('api/logout/', LogoutView.as_view(), name='logout'),
     path('api/', include(router.urls)),
 ]
