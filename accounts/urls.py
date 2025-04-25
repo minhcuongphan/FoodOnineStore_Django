@@ -1,5 +1,10 @@
 from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from . import views
+from .api_views import UserViewSet
+# Create a router and register the UserViewSet
+router = DefaultRouter()
+router.register(r'users', UserViewSet, basename='user')
 
 urlpatterns = [
     path('', views.myAccount),
@@ -16,4 +21,7 @@ urlpatterns = [
     path('reset_password/', views.reset_password, name='reset_password'),
     path('vendor/', include('vendor.urls')),
     path('customer/', include('customers.urls')),
+
+    # Include the router's URLs for the UserViewSet
+    path('api/', include(router.urls)),
 ]

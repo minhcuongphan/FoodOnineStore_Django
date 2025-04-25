@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'orders',
     'django_cron',
     'mailqueue',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
