@@ -1,0 +1,9 @@
+Django>=3.2,<4.0
+djangorestframework
+djangorestframework-simplejwt
+django-cron
+django-mail-queue
+psycopg2-binary
+python-decouple
+simplejson
+Pillow

@@ -7,14 +7,10 @@ from rest_framework.exceptions import AuthenticationFailed
 import jwt
 import datetime
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.permissions import BasePermission
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
-
-class IsAdminUser(BasePermission):
-    def has_permission(self, request, view):
-        return request.user and request.user.is_admin and request.user.is_superuser
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -22,6 +18,7 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):

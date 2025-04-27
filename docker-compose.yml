@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+    container_name: django_app
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DEBUG=True
+      - DJANGO_SETTINGS_MODULE=foodOnline_main.settings
+
+  db:
+    image: postgres:14
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: django_user
+      POSTGRES_PASSWORD: django_password
+      POSTGRES_DB: django_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

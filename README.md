@@ -24,20 +24,11 @@ FoodOnlineStore is a web application built with Django that allows users to mana
 - PostgreSQL
 - Virtual Environment (optional but recommended)
 
-### Steps
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-repo/FoodOnlineStore.git
-   cd FoodOnlineStore
+### Build the Docker images:
+docker-compose build
 
-### Create and activate a virtual environment:
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-
-### Install dependencies:
-pip install -r requirements.txt
-
+### Start the containers:
+docker-compose up
 
 ### Run migrations:
 
@@ -47,10 +38,6 @@ python manage.py migrate
 ### Create a superuser:
 
 python manage.py createsuperuser
-
-### Start the development server:
-
-python manage.py runserver
 
 ### Cron jobs
 
