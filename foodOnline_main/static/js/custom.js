@@ -1,4 +1,21 @@
 $(document).ready(function() {
+    const $languageSelect = $('#language-select');
+
+    // Function to update the class based on the selected value
+    function updateLanguageClass() {
+        const selectedValue = $languageSelect.val();
+        $languageSelect.removeClass('en vi'); // Remove existing language classes
+        $languageSelect.addClass(selectedValue); // Add the new language class
+    }
+
+    // Initialize the correct class on page load
+    updateLanguageClass();
+
+    // Update the class whenever the value changes
+    $languageSelect.on('change', function () {
+        updateLanguageClass();
+    });
+
     $('.add_to_cart').on('click', function(e) {
         e.preventDefault();
         food_id = $(this).attr('data-id');

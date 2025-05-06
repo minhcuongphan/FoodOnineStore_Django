@@ -19,6 +19,7 @@ from . import views
 from django.conf import settings
 from django.conf.urls.static import static
 from marketplace import views as marketplaceViews
+from django.conf.urls.i18n import set_language
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,4 +30,5 @@ urlpatterns = [
     path('search/', marketplaceViews.search, name='search'),
     path('checkout/', marketplaceViews.checkout, name='checkout'),
     path('orders/', include('orders.urls')),
+    path('i18n/set_language/', set_language, name='set_language'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

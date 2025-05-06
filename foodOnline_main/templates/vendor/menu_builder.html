@@ -40,7 +40,7 @@
                                         {% include 'includes/alerts.html' %}
                                         <form id="csv-upload-form" enctype="multipart/form-data">
                                             {% csrf_token %}
-                                            <input type="file" class="form-control p-1" name="csv_file" accept=".csv" required>
+                                            <input type="file" class="form-control p-1" name="csv_file" id="food_item_file_upload" accept=".csv" required>
                                             <button type="button" id="upload-button" class="btn btn-primary float-right text-center mt-3">Upload</button>
                                         </form>
                                         <div id="validation-result"></div>
@@ -62,7 +62,9 @@
                                             <td class="text-left">{{ forloop.counter }}</td>
                                             <td class="text-left">
                                                 <a href="{% url 'fooditems_by_category' cat.id %}">
-                                                    <p class="mb-0 font-weight-bold">{{ cat }}</p>
+                                                    <p class="mb-0 font-weight-bold">{{ cat }}
+                                                        <span>({{ cat.fooditems.count }})</span>
+                                                    </p>
                                                     <small class="text-muted">{{ cat.description }}</small>
                                                 </a>
                                             </td>
@@ -103,6 +105,12 @@
 
         $('#upload-button').click(function() {
             var formData = new FormData($('#csv-upload-form')[0]);
+
+            if (!$('#food_item_file_upload').val()) {
+                $('#validation-result').html('<p class="error text-danger mt-1">Please select a file to upload.</p>');
+                return;
+            }
+
             $.ajax({
                 url: '{% url 'validate_and_import_csv' %}',
                 type: 'POST',
@@ -139,7 +147,7 @@
                     }
                 },
                 error: function(xhr) {
-                    $('#validation-result').html('<p class="error">Error during processing: ' + xhr.statusText + '</p>');
+                    $('#validation-result').html('<p class="error text-danger mt-1">Error during processing: ' + xhr.statusText + '</p>');
                 }
             });
         });

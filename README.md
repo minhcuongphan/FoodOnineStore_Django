@@ -30,6 +30,15 @@ docker-compose build
 ### Start the containers:
 docker-compose up
 
+### Access the web container
+docker-compose exec web bash
+
+### Access the db container
+docker-compose exec db psql -U django_user -d django_db
+
+### Stop all running containers:
+docker-compose down
+
 ### Run migrations:
 
 python manage.py makemigrations
