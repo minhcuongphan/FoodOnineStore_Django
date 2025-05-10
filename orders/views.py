@@ -103,6 +103,9 @@ def place_order(request):
 
 @login_required(login_url= 'login')
 def payments(request):
+    # print('request', request.POST)
+    # print('payments....')
+
     try:
         with transaction.atomic():
             commonValidations(request)
@@ -111,7 +114,9 @@ def payments(request):
             payment_method = request.POST.get('payment_method')
             status = request.POST.get('status')
 
+            # print('payments....')
             # print(order_number, transaction_id, payment_method, status)
+
             order = Order.objects.get(user=request.user, order_number=order_number)
             payment = Payment(
                 user=request.user,
@@ -148,8 +153,7 @@ def payments(request):
                 'order': order,
                 'to_email': order.email,
             }
-            send_notification(mail_subject, mail_template, context)
-
+            # send_notification(mail_subject, mail_template, context)
             # Send order received email to the vendors
             mail_subject = 'You have received a new order'
             mail_template = 'orders/new_order_received_email.html'
@@ -163,7 +167,7 @@ def payments(request):
                 'to_email': to_emails,
             }
 
-            send_notification(mail_subject, mail_template, context)
+            # send_notification(mail_subject, mail_template, context)
             # Clear the cart if the payment is success
             cart_items.delete()
 

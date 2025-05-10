@@ -12,6 +12,7 @@ urlpatterns = [
     path('menu-builder/category/add/', views.add_category, name='add_category'),
     path('menu-builder/category/edit/<int:pk>/', views.edit_category, name='edit_category'),
     path('menu-builder/category/delete/<int:pk>/', views.delete_category, name='delete_category'),
+    path('menu-builder/category/revision/<int:pk>/', views.revision_category, name='revision_category'),
 
     #Food CRUD
     path('menu-builder/food/add/', views.add_food, name='add_food'),
@@ -19,6 +20,7 @@ urlpatterns = [
     path('menu-builder/food/delete/<int:pk>/', views.delete_food, name='delete_food'),
     # path('menu-builder/food/import', views.import_food_item, name='import_food_item'),
     # path('menu-builder/food/download-error-csv/', views.download_error_csv, name='download_error_csv'),
+    path('menu-builder/food/revision/<int:pk>/', views.revision_food, name='revision_food'),
 
     path('menu-builder/food/upload-csv/', views.validate_and_import_csv, name='validate_and_import_csv'),
     path('menu-builder/food/download-error-csv/', views.download_error_csv, name='download_error_csv'),

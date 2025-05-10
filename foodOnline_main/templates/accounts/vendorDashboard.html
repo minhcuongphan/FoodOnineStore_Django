@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load i18n %}
+{% load custom_tags %}
 {% block content %}
 {% include 'includes/alerts.html' %}
 <!-- Main Section Start -->
@@ -80,7 +81,7 @@
                                                     <td>{{ order.name }}</td>
                                                     <td>${{ order.get_total_by_vendor.grand_total }}</td>
                                                     <td>{{ order.status }}</td>
-                                                    <td>{{ order.created_at }}</td>
+                                                    <td>{{ order.created_at|format_datetime}}</td>
                                                     <td><a href="{% url 'vendor_order_details' order.order_number %}" class="btn btn-danger">Details</a></td>
                                                   </tr>
                                                   {% endfor %}

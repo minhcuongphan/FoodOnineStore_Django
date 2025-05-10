@@ -108,3 +108,16 @@ form.language-switch-form {
     background-image: url("../images/flags/vietnam.png");
 }
 /* END: language switcher  */
+
+
+table.table.revision-category-table th {
+    width: 20px;
+    height: 40px;
+    background-color: #ededf6;
+}
+
+table.table.revision-category-table td {
+    width: 108px;
+    height: auto;
+    line-height: 1.5;
+}

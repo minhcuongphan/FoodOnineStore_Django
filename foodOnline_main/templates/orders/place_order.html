@@ -105,7 +105,7 @@
 </div>
 
 <script>
-    var grandtotal = "{{ grandtotal }}"
+    var grandtotal = "{{ grandtotal|floatformat:2 }}";
     var url = "{% url 'payments' %}"
     var order_number = "{{ order.order_number }}"
     var order_complete_url = "{% url 'order_complete' %}"
@@ -127,6 +127,13 @@
     }
     const csrftoken = getCookie('csrftoken');
 
+
+    console.log('csrftoken: ' + csrftoken);
+    console.log('grandtotal: ' + grandtotal);
+    console.log('url: ' + url);
+    console.log('order_number: ' + order_number);
+    console.log('order_complete_url: ' + order_complete_url);
+
     // Render the PayPal button into #paypal-button-container
     paypal.Buttons({
         // Call your server to set up the transaction
@@ -134,7 +141,7 @@
             return actions.order.create({
                 purchase_units: [{
                     amount: {
-                        value: grandtotal
+                        value: parseFloat(grandtotal).toFixed(2)
                     }
                 }]
             })

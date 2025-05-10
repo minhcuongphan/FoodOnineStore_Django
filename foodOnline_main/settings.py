@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'mailqueue',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
+    'simple_history',
 ]
 
 MIDDLEWARE = [
@@ -65,6 +66,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'orders.request_object.RequestObjectMiddleware', # custom middleware created to access the request object in models.py
     'django.middleware.locale.LocaleMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
 REST_FRAMEWORK = {
@@ -224,3 +226,6 @@ MAILQUEUE_LIMIT = 50
 # and use Django's filesystem storage instead (stores them in MAILQUEUE_ATTACHMENT_DIR)
 MAILQUEUE_STORAGE = True
 MAILQUEUE_ATTACHMENT_DIR = BASE_DIR / 'mailqueue-attachments'
+
+
+SIMPLE_HISTORY_HISTORY_USER_ID_FIELD = 'user'

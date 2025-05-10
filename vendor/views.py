@@ -65,6 +65,20 @@ def menu_builder(request):
     categories = Category.objects.filter(vendor=get_vendor(request)).order_by('created_at')
     error_csv_available = False
 
+    #print log histories of each category
+    # for category in categories:
+    #     print(f"Category: {category.category_name}")
+    #     history = category.history.all().order_by('-history_date')  # Order by most recent history
+    #     print(f"history: {history}")
+    #     if history:
+    #         for i in range(len(history) - 1):
+    #             current_record = history[i]
+    #             previous_record = history[i + 1]
+    #             print(f"History Date: {current_record.history_date}")
+    #             print(f"Old Value: {previous_record.description}")
+    #             print(f"New Value: {current_record.description}")
+    #             print(f"Updated By: {current_record.history_user}")
+
     # if request.method == "POST":
     #     error_csv_available = 'error_csv' in request.session
     #     valid_rows = [] if 'valid_rows' not in request.session else request.session['valid_rows']
@@ -437,3 +451,79 @@ def download_error_csv(request):
     request.session.pop('error_csv_filename', None)
 
     return response
+
+@login_required(login_url='login')
+@user_passes_test(check_role_vendor)
+def revision_category(request, pk=None):
+    category = get_object_or_404(Category, pk=pk)
+    category_histories = []
+    history = category.history.all().order_by('-history_date')  # Order by most recent history
+
+    for i in range(len(history) - 1):
+        current_record = history[i]
+        previous_record = history[i + 1]
+
+        # Compare fields and log changes
+        changes = []
+        for field in ['category_name', 'description']:  # List all fields you want to track
+            old_value = getattr(previous_record, field, None)
+            new_value = getattr(current_record, field, None)
+            if old_value != new_value:  # Check if the field value has changed
+                changes.append({
+                    'field': field,
+                    'old_value': old_value,
+                    'new_value': new_value,
+                })
+
+        category_histories.append({
+            'history_date': current_record.history_date,
+            'updated_by': current_record.history_user,
+            'changes': changes,
+        })
+
+    context = {
+        'category_histories': category_histories,
+    }
+
+    return render(request, 'vendor/revision_category.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(check_role_vendor)
+def revision_food(request, pk=None):
+    fooditem = get_object_or_404(FoodItem, pk=pk)
+    fooditem_histories = []
+    history = fooditem.history.all().order_by('-history_date')  # Order by most recent history
+
+
+    # Handle the case where there is only one historical record
+
+    print("History: ", history)
+    print("History count: ", history.count())
+
+    for i in range(len(history) - 1):
+        current_record = history[i]
+        previous_record = history[i + 1]
+
+        # Compare fields and log changes
+        changes = []
+        for field in ['category', 'food_title', 'description', 'price', 'image', 'is_available']:  # List all fields you want to track
+            old_value = getattr(previous_record, field, None)
+            new_value = getattr(current_record, field, None)
+            if old_value != new_value:  # Check if the field value has changed
+                changes.append({
+                    'field': field,
+                    'old_value': old_value,
+                    'new_value': new_value,
+                })
+
+        fooditem_histories.append({
+            'history_date': current_record.history_date,
+            'updated_by': current_record.history_user,
+            'changes': changes,
+        })
+
+    context = {
+        'fooditem_histories': fooditem_histories,
+    }
+
+    return render(request, 'vendor/revision_food.html', context)

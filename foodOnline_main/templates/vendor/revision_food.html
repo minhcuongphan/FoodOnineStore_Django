@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+{% load i18n %}
+{% block content %}
+{% include 'includes/alerts.html' %}
+<!-- Main Section Start -->
+<div class="main-section">
+    {% include 'includes/cover.html' %}
+    <div class="page-section account-header buyer-logged-in">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                    <div class="user-account-nav user-account-sidebar">
+                        {% comment %} Loading the sidebar here {% endcomment %}
+                        {% include 'includes/v_sidebar.html' %}
+                    </div>
+                </div>
+                <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
+                    <div class="user-dashboard loader-holder">
+                        <div class="user-holder">
+                            <h2>{% trans "Build Your Food Menu" %}</h2>
+                            <hr>
+                            <button class="btn btn-secondary" onclick="history.back()"><i class="fa-solid fa-angle-left"></i> {% trans "Back" %}</button>
+                            <br><br>
+                            <h6>{% trans "Revision Food Item" %}</h6>
+
+                            <div class="table-responsive">
+                                <table class="table revision-category-table">
+                                    <thead>
+                                        <tr>
+                                            <th>{% trans "History Date" %}</th>
+                                            <th>{% trans "Updated By" %}</th>
+                                            <th>{% trans "Field" %}</th>
+                                            <th>{% trans "Old Value" %}</th>
+                                            <th>{% trans "New Value" %}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% if fooditem_histories %}
+                                            {% for history in fooditem_histories %}
+                                                {% for change in history.changes %}
+                                                <tr>
+                                                    <td>{{ history.history_date|format_datetime }}</td>
+                                                    <td>{{ history.updated_by }}</td>
+                                                    <td>{{ change.field }}</td>
+                                                    <td>{{ change.old_value }}</td>
+                                                    <td>{{ change.new_value }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            {% endfor %}
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="5" class="text-center">{% trans "No revision history available." %}</td>
+                                            </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Main Section End -->
+{% endblock %}
