@@ -251,4 +251,67 @@ $(document).ready(function() {
     $("input[name='payment_method']").on('change', function () {
         $('#payment-method-error').html('');
     });
+
+    // Get the CSRF token from the cookie
+    function getCSRFToken() {
+        let csrfToken = null;
+        if (document.cookie) {
+            document.cookie.split(';').forEach(function (cookie) {
+                const [key, value] = cookie.trim().split('=');
+                if (key === 'csrftoken') {
+                    csrfToken = decodeURIComponent(value);
+                }
+            });
+        }
+        return csrfToken;
+    }
+
+    // Delete coupon
+    $('.coupon-delete-btn').click(function () {
+        var couponId = $(this).data('id');
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/coupons/api/delete/${couponId}/`,
+                    type: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire(
+                                'Deleted!',
+                                response.message,
+                                'success'
+                            ).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire(
+                                'Error!',
+                                response.message,
+                                'error'
+                            );
+                        }
+                    },
+                    error: function (xhr) {
+                        Swal.fire(
+                            'Error!',
+                            'An error occurred while deleting the coupon.',
+                            'error'
+                        );
+                    }
+                });
+            }
+        });
+    });
 });

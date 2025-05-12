@@ -1,0 +1,54 @@
+{% load static %}
+
+<div class="form-fields-set">
+    <div class="row">
+        <div class="col-lg-6 col-md-6 col-sm-6">
+            <div class="field-holder">
+                <label class="required-field">Coupon code</label>
+                {{ form.code }}
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-6">
+            <div class="field-holder">
+                <label class="required-field">Couple type</label>
+                {{ form.discount_type }}
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-6">
+            <div class="field-holder">
+                <label class="required-field">Amount</label>
+                {{ form.amount }}
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-6">
+            <div class="field-holder">
+                <label class="required-field">Max uses</label>
+                {{ form.max_uses }}
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-6">
+            <div class="field-holder">
+                <label class="required-field">Valid from</label>
+                {{ form.valid_from }}
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-6">
+            <div class="field-holder">
+                <label class="required-field">Valid to</label>
+                {{ form.valid_to }}
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-6">
+            <div class="field-holder">
+                <label>Min cart value</label>
+                {{ form.min_cart_value }}
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-6">
+            <div class="field-holder">
+                <label>Is Available?</label>
+                {{ form.active }}
+            </div>
+        </div>
+    </div>
+</div>

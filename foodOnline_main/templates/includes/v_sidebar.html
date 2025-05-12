@@ -5,6 +5,7 @@
         <li class="{% if 'profile' in request.path %}active{% endif %}"><a href="{% url 'vprofile' %}"><i class="icon-building"></i>{% trans "My Restaurant" %}</a></li>
         <li class="{% if 'menu_builder' in request.path %}active{% endif %}"><a href="{% url 'menu_builder' %}"><i class="icon-menu5"></i>{% trans "Menu Builder" %}</a></li>
         <li class="{% if 'opening_hours' in request.path %}active{% endif %}"><a href="{% url 'opening_hours' %}"><i class="icon-menu5"></i>{% trans "Opening hours" %}</a></li>
+        <li class="{% if 'coupons_list' in request.path %}active{% endif %}"><a href="{% url 'coupons_list' %}"><i class="icon-menu5"></i>{% trans "Coupons" %}</a></li>
         <li class="{% if '/my_orders/' in request.path %}active{% endif %}"><a href="{% url 'vendor_my_orders' %}"><i class="icon-add_shopping_cart"></i>{% trans "Orders" %}</a></li>
     </ul>
 </div>

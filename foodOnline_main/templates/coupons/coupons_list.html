@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load custom_tags %}
+{% block content %}
+{% include 'includes/alerts.html' %}
+<!-- Main Section Start -->
+<div class="main-section">
+    {% include 'includes/cover.html' %}
+    <div class="page-section account-header buyer-logged-in">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                    <div class="user-account-nav user-account-sidebar">
+                        {% comment %} Loading the sidebar here {% endcomment %}
+                        {% include 'includes/v_sidebar.html' %}
+                    </div>
+                </div>
+                <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
+                    <div class="user-dashboard loader-holder">
+                        <div class="user-holder">
+                            <h2>Coupon Management</h2>
+                            <hr>
+                            {% comment %} <h6>Menu categories</h6> {% endcomment %}
+
+                            <a href="{% url "add_coupon" %}" class="btn btn-success float-right m-1"><i class="fa-solid fa-plus"></i> Add Coupon</a>
+
+                            <div class="table-responsive">
+                                <table class="table mt-3 coupon-list-table">
+                                    <thead>
+                                        <tr>
+                                            <th>{% trans "Coupon code" %}</th>
+                                            <th>{% trans "Discount type" %}</th>
+                                            <th>{% trans "Amount" %}</th>
+                                            <th>{% trans "Valid from" %}</th>
+                                            <th>{% trans "Valid to" %}</th>
+                                            <th>{% trans "Action" %}</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% if paginated_coupons %}
+                                            {% for coupon in paginated_coupons %}
+                                                <tr>
+                                                    <td>{{ coupon.code }}</td>
+                                                    <td>{{ coupon.discount_type }}</td>
+                                                    <td>{{ coupon.amount }}</td>
+                                                    <td>{{ coupon.valid_from|format_datetime }}</td>
+                                                    <td>{{ coupon.valid_to|format_datetime }}</td>
+                                                    <td colspan="2" class="coupon-action-btn">
+                                                        {% comment %} <a href="" class="btn btn-primary">View</a> {% endcomment %}
+                                                        <a href="{% url 'edit_coupon' coupon.id %}" class="btn btn-info">Edit</a>
+                                                        <a href="javascript:void(0);" class="btn btn-danger coupon-delete-btn" data-id="{{ coupon.id }}">Delete</a>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="6" class="text-center">No coupons available.</td>
+                                            </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+
+                                {% if paginated_coupons.has_other_pages %}
+                                    <ul class="pagination justify-content-center">
+                                        {% if paginated_coupons.has_previous %}
+                                            <li><a href="?page={{ paginated_coupons.previous_page_number }}">&laquo;</a></li>
+                                        {% else %}
+                                            <li class="disabled"><span>&laquo;</span></li>
+                                        {% endif %}
+                                        {% if paginated_coupons.has_previous %}
+                                        <li><a href="?page={{ paginated_coupons.previous_page_number }}">&laquo;</a></li>
+                                        {% else %}
+                                        <li class="disabled"><span>&laquo;</span></li>
+                                        {% endif %}
+                                        {% for i in paginated_coupons.paginator.page_range %}
+                                        {% if paginated_coupons.number == i %}
+                                            <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                                        {% else %}
+                                            <li><a href="?page={{ i }}">{{ i }}</a></li>
+                                        {% endif %}
+                                        {% endfor %}
+                                        {% if paginated_coupons.has_next %}
+                                        <li><a href="?page={{ paginated_coupons.next_page_number }}">&raquo;</a></li>
+                                        {% else %}
+                                        <li class="disabled"><span>&raquo;</span></li>
+                                        {% endif %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Main Section End -->
+
+<script>
+    $(document).ready(function() {
+        // Prevent form resubmission on page reload
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.href);
+        }
+
+        $('#upload-button').click(function() {
+            var formData = new FormData($('#csv-upload-form')[0]);
+
+            if (!$('#food_item_file_upload').val()) {
+                $('#validation-result').html('<p class="error text-danger mt-1">Please select a file to upload.</p>');
+                return;
+            }
+
+            $.ajax({
+                url: '{% url 'validate_and_import_csv' %}',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    $('#validation-result').empty();
+                    $('#error-list').empty();
+                    $('#download-link').hide();
+
+                    if (response.status === 'success') {
+                        $('#validation-result').html('<p class="success">' + response.message + '</p>');
+                        window.location.href = response.redirect_url;
+                    } else if (response.status === 'error') {
+                        $('#validation-result').html('<p class="error">Validation failed. See errors below.</p>');
+                        var errorList = '<ul>';
+                        if (response.errors) {
+                            response.errors.forEach(function(error) {
+                                errorList += '<li>Row ' + error.row_number + ': ' + error.errors + ' (Columns: ' + error.error_columns + ')</li>';
+                            });
+                        } else {
+                            for (var field in response.errors) {
+                                response.errors[field].forEach(function(error) {
+                                    errorList += '<li>' + error.message + '</li>';
+                                });
+                            }
+                        }
+                        errorList += '</ul>';
+                        $('#error-list').html(errorList);
+                        if (response.error_csv_available) {
+                            $('#download-link').show();
+                        }
+                    }
+                },
+                error: function(xhr) {
+                    $('#validation-result').html('<p class="error text-danger mt-1">Error during processing: ' + xhr.statusText + '</p>');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

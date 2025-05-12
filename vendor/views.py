@@ -97,7 +97,7 @@ def menu_builder(request):
 @user_passes_test(check_role_vendor)
 def fooditems_by_category(request, pk=None):
     category = get_object_or_404(Category, pk=pk)
-    fooditems = FoodItem.objects.filter(vendor=get_vendor(request), category=category)
+    fooditems = FoodItem.objects.filter(vendor=get_vendor(request), category=category).order_by('id')
     context = {
         'fooditems': fooditems,
         'category': category

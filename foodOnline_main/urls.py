@@ -30,5 +30,6 @@ urlpatterns = [
     path('search/', marketplaceViews.search, name='search'),
     path('checkout/', marketplaceViews.checkout, name='checkout'),
     path('orders/', include('orders.urls')),
+    path('coupons/', include('coupons.urls')),
     path('i18n/set_language/', set_language, name='set_language'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
