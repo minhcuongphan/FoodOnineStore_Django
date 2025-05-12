@@ -63,6 +63,22 @@ def place_order(request):
         if form.is_valid():
             try:
                 with transaction.atomic():
+                    userid = str(request.user.id)  # Get the authenticated user's ID
+                    discount_code_key = f'discount_code_{userid}'
+                    grandtotal_key = f'temp_grandtotal_{userid}'
+
+                    # Check if the discount code is in the request and not empty
+                    if request.POST.get('discount_code') == '':
+                        request.session.pop(discount_code_key, '')
+                        request.session.pop(grandtotal_key, '')
+
+                    discount_code = ''
+                    temp_grandtotal = ''
+                    # Check if the discount code and grand total are in the session
+                    if discount_code_key in request.session and grandtotal_key in request.session:
+                        discount_code = request.session.get(discount_code_key, '')
+                        temp_grandtotal = request.session.get(grandtotal_key, '')
+
                     order = Order()
                     order.first_name = form.cleaned_data['first_name']
                     order.last_name = form.cleaned_data['last_name']
@@ -74,7 +90,7 @@ def place_order(request):
                     order.city = form.cleaned_data['city']
                     order.pin_code = form.cleaned_data['pin_code']
                     order.user = request.user
-                    order.total = grand_total
+                    order.total = temp_grandtotal if discount_code != '' else grand_total
                     order.tax_data = json.dumps(tax_data)
                     order.total_data = json.dumps(total_data)
                     order.total_tax = total_tax
@@ -87,6 +103,9 @@ def place_order(request):
                 context = {
                     'order': order,
                     'cart_items': cart_items,
+                    'userid': userid,
+                    'discount_code': discount_code,
+                    'temp_discounted_grandtotal': temp_grandtotal,
                 }
 
                 return render(request, 'orders/place_order.html', context)

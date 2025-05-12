@@ -10,4 +10,5 @@ urlpatterns = [
 
     # API URLs
     path('api/delete/<int:coupon_id>/', api_views.delete_coupon_api, name='delete_coupon_api'),
+    path('api/apply/', api_views.apply_discount_code, name='apply_discount_code'),
 ]

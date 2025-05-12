@@ -80,11 +80,25 @@
                                                 {% endfor %}
                                             {% endfor %}
 
+                                            {% if discount_code %}
+                                                <li style="list-style-type: none;">
+                                                    Discount Code:
+                                                    <span class="price float-right">
+                                                        <span id="discount">{{ discount_code }}</span>
+                                                    </span>
+                                                </li>
+                                            {% endif %}
+
                                             <li style="list-style-type: none; font-weight: 600;">
                                                 TOTAL
                                                 <span class="price float-right">
                                                     <span class="currency">$</span>
-                                                    <span id="total">{{ grandtotal }}</span>
+
+                                                    {% if discount_code %}
+                                                        <span id="total">{{ temp_discounted_grandtotal|floatformat:2 }}</span>
+                                                    {% else %}
+                                                        <span id="total">{{ grandtotal|floatformat:2 }}</span>
+                                                    {% endif %}
                                                 </span>
                                             </li>
 
@@ -105,10 +119,16 @@
 </div>
 
 <script>
+    var temp_discounted_grandtotal = "{{ temp_discounted_grandtotal|floatformat:2 }}";
+    var discount_code = "{{ discount_code }}";
     var grandtotal = "{{ grandtotal|floatformat:2 }}";
     var url = "{% url 'payments' %}"
     var order_number = "{{ order.order_number }}"
     var order_complete_url = "{% url 'order_complete' %}"
+
+    if (discount_code != '') {
+        grandtotal = temp_discounted_grandtotal;
+    }
 
     function getCookie(name) {
         let cookieValue = null;
@@ -129,7 +149,9 @@
 
 
     console.log('csrftoken: ' + csrftoken);
+    console.log('discount_code: ' + discount_code);
     console.log('grandtotal: ' + grandtotal);
+    console.log('temp_discounted_grandtotal: ' + temp_discounted_grandtotal);
     console.log('url: ' + url);
     console.log('order_number: ' + order_number);
     console.log('order_complete_url: ' + order_complete_url);

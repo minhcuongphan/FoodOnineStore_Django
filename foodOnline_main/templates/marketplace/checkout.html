@@ -128,6 +128,21 @@
                                             </li>
                                             <br>
                                             <hr>
+
+                                            <!-- Discount Code Input -->
+                                            <div class="discount-code-section">
+                                                <label for="discount-code" style="font-weight: 600;">Have a discount code?</label>
+                                                <div class="input-group">
+                                                    <input type="text" id="discount-code" name="discount_code" class="form-control" placeholder="Enter discount code">
+                                                    <div class="input-group-append">
+                                                        <button type="button" id="apply-discount-btn" data-user-id={{ request.user.id }} class="btn btn-primary">Apply</button>
+                                                    </div>
+                                                </div>
+                                                <span class="text-danger" id="discount-code-error"></span>
+                                            </div>
+
+                                            <br>
+                                            <hr>
                                             {% comment %}START: Select payment method {% endcomment %}
                                             <h5>SELECT PAYMENT METHOD</h5>
                                             <div class="payment-method">

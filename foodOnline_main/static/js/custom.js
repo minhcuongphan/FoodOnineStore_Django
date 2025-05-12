@@ -314,4 +314,45 @@ $(document).ready(function() {
             }
         });
     });
+
+    //Discount code verification and apply the discount code
+    $('#apply-discount-btn').click(function () {
+        // console.log({{ request.user }})
+        var discountCode = $('#discount-code').val(); // Get the entered discount code
+        var total = $('#total').text(); // Get the current total amount
+        var userid = $(this).attr('data-user-id');
+
+        if (!discountCode) {
+            $('#discount-code-error').text('Please enter a discount code.');
+            return;
+        }
+
+        // Clear any previous error messages
+        $('#discount-code-error').text('');
+
+        // Send an AJAX request to validate and apply the discount code
+        $.ajax({
+            url: '/coupons/api/apply/', // Replace with your discount code API endpoint
+            type: 'POST',
+            data: {
+                discount_code: discountCode,
+                grandtotal: total,
+                'X-CSRFToken': getCSRFToken(),
+                userid: userid
+            },
+            success: function (response) {
+                if (response.success) {
+                    // Update the total with the discounted amount
+                    $('#total').text(response.new_total);
+                    Swal.fire('Success!', response.message, 'success');
+                } else {
+                    // Show error message
+                    $('#discount-code-error').text(response.message);
+                }
+            },
+            error: function () {
+                Swal.fire('Error!', 'An error occurred while applying the discount code.', 'error');
+            }
+        });
+    });
 });
